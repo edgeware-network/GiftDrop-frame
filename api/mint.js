@@ -1,10 +1,24 @@
-const ethers = require('ethers');
+require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const { ethers } = require('ethers');
 
-// Initialize provider
-const provider = new ethers.providers.JsonRpcProvider('https://edgeware-evm.jelliedowl.net');
+const app = express();
+const port = process.env.PORT || 3000;
 
-// Define contract ABI
-const abi = [
+app.use(bodyParser.json());
+
+app.post('/claim', async (req, res) => {
+    const receiverAddress = req.body.address;
+    if (!ethers.utils.isAddress(receiverAddress)) {
+        return res.status(400).send('Invalid address');
+    }
+
+    const provider = new ethers.providers.JsonRpcProvider('https://edgeware-evm.jelliedowl.net');
+    const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+
+    const contractAddress = '0x59f70Aa184cb5014E7faA94CA5acAf1127378094';
+    const abi = [
   {
     "type": "constructor",
     "name": "",
@@ -1972,51 +1986,22 @@ const abi = [
     "stateMutability": "view"
   }
 ];
+    const contract = new ethers.Contract(contractAddress, abi, wallet);
 
-// Initialize contract instance
-const contractAddress = '0x59f70Aa184cb5014E7faA94CA5acAf1127378094';
-const contract = new ethers.Contract(contractAddress, abi, provider);
+    try {
+        const tx = await contract.claim(
+            receiverAddress, // _receiver
+            /* Other parameters as required by the claim function */
+        );
 
-// Get private key from environment variable
-const privateKey = process.env.PRIVATE_KEY;
+        const receipt = await tx.wait();
+        res.send({ transactionHash: receipt.transactionHash });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error submitting transaction');
+    }
+});
 
-// Function to interact with the contract and encode the claim transaction
-exports.handler = async (event) => {
-  try {
-    // Get address from the event
-    const receiverAddress = event.address;
-
-    // Construct claim transaction
-    const tx = await contract.populateTransaction.claim(
-      receiverAddress,
-      0, // _tokenId
-      1, // _quantity
-      '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', // _currency
-      0, // _pricePerToken
-      {
-        proof: [],
-        quantityLimitPerWallet: 0,
-        pricePerToken: 0,
-        currency: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-      },
-      '0x'
-    );
-
-    // Sign the transaction
-    const wallet = new ethers.Wallet(privateKey, provider);
-    const signedTx = await wallet.signTransaction(tx);
-
-    // Publish the transaction
-    const txHash = await provider.sendTransaction(signedTx);
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ txHash }),
-    };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
-    };
-  }
-};
+app.listen(port, () => {
+    console.log(`Server listening at http://localhost:${port}`);
+});
