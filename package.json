@@ -9,7 +9,7 @@
   },
   "routes": [
     {
-      "src": "/api/mint",
+      "src": "/api/mint/claim",
       "dest": "api/mint.js"
     }
   ]
