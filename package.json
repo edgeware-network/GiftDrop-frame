@@ -1,0 +1,13 @@
+{
+  "name": "giftdrop-frame",
+  "private": true,
+  "dependencies": {
+    "ethers": "^6.11.1"
+  },
+  "routes": [
+    {
+      "src": "/api/mint",
+      "dest": "api/mint.js"
+    }
+  ]
+}
