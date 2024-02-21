@@ -2000,14 +2000,21 @@ module.exports = async (req, res) => {
     // Prepare the transaction
     const AllowlistProof = {
       proof: [
-        "0x0000000000000000000000000000000000000000000000000000000000000001",
-        "0x8000000000000000000000000000000000000000000000000000000000000000",
         "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       ],
-      quantityLimitPerWallet: 1, 
+      quantityLimitPerWallet: 1,
       pricePerToken: 0,
-      currency: '0xffffffffffffffffffffffffffffffffffffffff'};
-    const data = contract.methods.claim(mintAddress, 0, 1, '0x0000000000000000000000000000000000000000', 0, AllowlistProof, '0x').encodeABI();
+      currency: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    };
+    const data = contract.methods.claim(
+      mintAddress,
+      0,
+      1,
+      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      0,
+      AllowlistProof,
+      '0x'
+    ).encodeABI();
 
     // Get the current transaction count
     const txCount = await web3.eth.getTransactionCount(account.address);
