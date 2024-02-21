@@ -1,14 +1,20 @@
 require('dotenv').config();
-const { ethers } = require('ethers');
+const Web3 = require('web3');
+const { AbiItem } = require('web3-utils');
 
 // Environment variables
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const CONTRACT_ADDRESS = '0x59f70Aa184cb5014E7faA94CA5acAf1127378094';
 const RPC_URL = 'https://edgeware-evm.jelliedowl.net';
 
-// Initialize provider and signer
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+// Initialize web3
+const web3 = new Web3(new Web3.providers.HttpProvider(RPC_URL));
+
+// Get the account from the private key
+const account = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY);
+web3.eth.accounts.wallet.add(account);
+
+// Contract ABI
 const contractABI = [
   {
     "type": "constructor",
@@ -1977,7 +1983,9 @@ const contractABI = [
     "stateMutability": "view"
   }
 ];
-const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, wallet);
+
+// Initialize contract
+const contract = new web3.eth.Contract(contractABI, CONTRACT_ADDRESS);
 
 // Serverless function handler
 module.exports = async (req, res) => {
@@ -1989,11 +1997,29 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Call the mint function on the contract
-    const transaction = await contract.claim(mintAddress, 0, 1, ethers.constants.AddressZero, 0, [], '0x');
-    await transaction.wait();
+    // Prepare the transaction
+    const data = contract.methods.claim(mintAddress, 0, 1, '0x0000000000000000000000000000000000000000', 0, [], '0x').encodeABI();
 
-    res.status(200).send({ success: true, message: 'NFT minted successfully.' });
+    // Get the current transaction count
+    const txCount = await web3.eth.getTransactionCount(account.address);
+
+    // Transaction object
+    const txObject = {
+      from: account.address,
+      to: CONTRACT_ADDRESS,
+      nonce: web3.utils.toHex(txCount),
+      gasLimit: web3.utils.toHex(800000),
+      gasPrice: web3.utils.toHex(web3.utils.toWei('2', 'gwei')),
+      data: data
+    };
+
+    // Sign the transaction
+    const signedTx = await web3.eth.accounts.signTransaction(txObject, PRIVATE_KEY);
+
+    // Send the transaction
+    const transactionReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+    res.status(200).send({ success: true, message: 'NFT minted successfully.', transactionHash: transactionReceipt.transactionHash });
   } catch (error) {
     console.error(error);
     res.status(500).send({ error: 'Failed to mint NFT.' });
