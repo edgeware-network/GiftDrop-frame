@@ -8,7 +8,7 @@ const CONTRACT_ADDRESS = '0x59f70Aa184cb5014E7faA94CA5acAf1127378094';
 const RPC_URL = 'https://edgeware-evm.jelliedowl.net';
 
 // Initialize web3
-const web3 = new Web3(new Web3.providers.HttpProvider(RPC_URL));
+const web3 = new Web3(RPC_URL);
 
 // Get the account from the private key
 const account = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY);
