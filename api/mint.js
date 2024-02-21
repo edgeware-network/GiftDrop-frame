@@ -1999,21 +1999,20 @@ module.exports = async (req, res) => {
   try {
     // Prepare the transaction
     const AllowlistProof = {
-      proof: [
-        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-      ],
-      quantityLimitPerWallet: 1,
-      pricePerToken: 0,
+      proof: ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"],
+      quantityLimitPerWallet: web3.utils.toBN(1),
+      pricePerToken: web3.utils.toBN(0),
       currency: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
     };
+    
     const data = contract.methods.claim(
       mintAddress,
-      0,
-      1,
-      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-      0,
+      0, // tokenId
+      1, // Quantity
+      '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', // Currency (native EDG in this case)
+      0, // Price per token
       AllowlistProof,
-      '0x'
+      '0x' // Data
     ).encodeABI();
 
     // Get the current transaction count
