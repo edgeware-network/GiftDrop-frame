@@ -1997,20 +1997,26 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Prepare the transaction
+    // Correctly format numeric values as BigNumber objects
+    const quantity = web3.utils.toBN(1); // Quantity to mint
+    const pricePerToken = web3.utils.toBN(0); // Price per token
+    
+    //AllowlistProof with corrected BigNumber formatting
     const AllowlistProof = {
       proof: ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"],
-      quantityLimitPerWallet: web3.utils.toBN(1),
-      pricePerToken: web3.utils.toBN(0),
+      quantityLimitPerWallet: quantity,
+      pricePerToken: pricePerToken,
       currency: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
     };
-    
+
+    // Prepare the transaction
+    // When calling the contract's `claim` function, pass numeric values as BigNumber or compatible strings
     const data = contract.methods.claim(
       mintAddress,
       0, // tokenId
-      1, // Quantity
+      quantity, // Quantity, correctly formatted as BigNumber
       '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', // Currency (native EDG in this case)
-      0, // Price per token
+      pricePerToken, // Price per token, correctly formatted as BigNumber
       AllowlistProof,
       '0x' // Data
     ).encodeABI();
