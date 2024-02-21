@@ -1998,8 +1998,12 @@ module.exports = async (req, res) => {
 
   try {
     // Correctly format numeric values as BigNumber objects
-    const quantity = web3.utils.toBN(1); // Quantity to mint
-    const pricePerToken = web3.utils.toBN(0); // Price per token
+    const quantityBig = web3.utils.toBN(1); // Quantity to mint
+    const pricePerTokenBig = web3.utils.toBN(0); // Price per token
+
+    // Convert BigNumber to string for compatibility
+    const quantity = quantityBig.toString();
+    const pricePerToken = pricePerTokenBig.toString();
     
     //AllowlistProof with corrected BigNumber formatting
     const AllowlistProof = {
