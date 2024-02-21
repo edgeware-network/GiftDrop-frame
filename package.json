@@ -1,0 +1,13 @@
+{
+  "name": "GiftDrop-Frame",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Edgeware EdgeEVM GiftDrop stack for Farcaster Frame",
+  "repository": "https://github.com/edgeware-network/GiftDrop-frame.git",
+  "author": "Shankar Warang <shankar@edgeware.community>",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.11.1"
+  }
+}
