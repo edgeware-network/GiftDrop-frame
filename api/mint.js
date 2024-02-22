@@ -2038,6 +2038,8 @@ module.exports = async (req, res) => {
       data: data
     };
 
+    console.log("Transaction Object:", txObject);
+
     // Sign the transaction
     const signedTx = await web3.eth.accounts.signTransaction(txObject, PRIVATE_KEY);
 
