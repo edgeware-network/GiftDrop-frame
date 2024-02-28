@@ -2038,15 +2038,13 @@ module.exports = async (req, res) => {
       data: data
     };
 
-    console.log("Transaction Object:", txObject);
-
     // Sign the transaction
     const signedTx = await web3.eth.accounts.signTransaction(txObject, PRIVATE_KEY);
 
     // Send the transaction
     const transactionReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
 
-    res.status(200).send({ success: true, message: 'NFT minted successfully.', transactionHash: transactionReceipt.transactionHash });
+    res.status(200).send({ success: true, message: 'NFT minted successfully.', transactionHash: transactionReceipt.transactionHash, rawUnsignedTransaction: txObject});
   } catch (error) {
     console.error(error);
     res.status(500).send({ error: 'Failed to mint NFT.' });
