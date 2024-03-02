@@ -2044,9 +2044,10 @@ module.exports = async (req, res) => {
     // Send the transaction
     const transactionReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
 
-    res.status(200).send({ success: true, message: 'NFT minted successfully.', transactionHash: transactionReceipt.transactionHash, rawUnsignedTransaction: txObject });
+    res.status(200).send({ success: true, message: 'NFT minted successfully.', transactionHash: transactionReceipt.transactionHash });
   } catch (error) {
     console.error(error);
-    res.status(500).send({ error: 'Failed to mint NFT.', rawUnsignedTransaction: txObject });
+    console.log("Failed txObject:", txObject);
+    res.status(500).send({ error: 'Failed to mint NFT.' });
   }
 };
