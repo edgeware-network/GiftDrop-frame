@@ -2028,6 +2028,7 @@ module.exports = async (req, res) => {
     // Get the current transaction count
     const txCount = await web3.eth.getTransactionCount(account.address);
 
+    debugger;
     // Transaction object
     const txObject = {
       from: account.address,
@@ -2038,6 +2039,7 @@ module.exports = async (req, res) => {
       data: data
     };
 
+    debugger;
     console.log("Raw unsigned tx:", txObject);
 
     // Sign the transaction
