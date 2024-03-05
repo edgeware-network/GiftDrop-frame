@@ -2004,7 +2004,7 @@ module.exports = async (req, res) => {
     // Convert BigNumber to string for compatibility
     const quantity = quantityBig.toString();
     const pricePerToken = pricePerTokenBig.toString();
-    
+
     // AllowlistProof with corrected BigNumber formatting
     const AllowlistProof = {
       proof: ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"],
@@ -2013,37 +2013,29 @@ module.exports = async (req, res) => {
       currency: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
     };
 
-    // Encode AllowlistProof using web3 ABI encoding
-    const allowlistProofData = web3.eth.abi.encodeFunctionCall(
-      {
-        name: 'claim',
-        type: 'function',
-        inputs: [
-          { type: 'address', name: 'mintAddress' },
-          { type: 'uint256', name: 'tokenId' },
-          { type: 'uint256', name: 'quantity' },
-          { type: 'address', name: 'currency' },
-          { type: 'uint256', name: 'pricePerToken' },
-          { type: 'bytes32[]', name: 'proof' },
-          { type: 'uint256', name: 'quantityLimitPerWallet' },
-          { type: 'uint256', name: 'pricePerToken' },
-          { type: 'address', name: 'currency' },
-          { type: 'bytes', name: 'data' },
-        ],
-      },
-      [
-        mintAddress,
-        0, // tokenId
-        quantity,
-        '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', // Currency
-        pricePerToken,
-        AllowlistProof.proof,
-        quantity,
-        pricePerToken,
-        '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', // Currency
-        '0x', // Data
-        ]
-    );
+    // Manually encode allowlistProofData parameters
+    const mintAddressBytes32 = web3.utils.padLeft(web3.utils.toHex(mintAddress), 64);
+    const tokenId = web3.utils.padLeft(web3.utils.toHex(0), 64);
+    const quantityBytes32 = web3.utils.padLeft(web3.utils.toHex(quantity), 64);
+    const currencyBytes32 = web3.utils.padLeft(web3.utils.toHex('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'), 64);
+    const pricePerTokenBytes32 = web3.utils.padLeft(web3.utils.toHex(pricePerToken), 64);
+    const proof = web3.utils.padRight(AllowlistProof.proof[0], 64);
+    const quantityLimitPerWalletBytes32 = web3.utils.padLeft(web3.utils.toHex(quantity), 64);
+    const pricePerTokenProofBytes32 = web3.utils.padLeft(web3.utils.toHex(pricePerToken), 64);
+    const currencyProofBytes32 = web3.utils.padLeft(web3.utils.toHex('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'), 64);
+    const data = web3.utils.padRight('0x', 64);
+
+    // Concatenate the encoded parameters
+    const allowlistProofData = mintAddressBytes32 +
+      tokenId +
+      quantityBytes32 +
+      currencyBytes32 +
+      pricePerTokenBytes32 +
+      proof +
+      quantityLimitPerWalletBytes32 +
+      pricePerTokenProofBytes32 +
+      currencyProofBytes32 +
+      data;
 
     // Prepare the transaction
     // When calling the contract's `claim` function, pass numeric values as BigNumber or compatible strings
