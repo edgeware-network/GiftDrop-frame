@@ -2039,7 +2039,7 @@ module.exports = async (req, res) => {
 
     // Prepare the transaction
     // When calling the contract's `claim` function, pass numeric values as BigNumber or compatible strings
-    const data = contract.methods.claim(
+    const transactionData = contract.methods.claim(
       mintAddress,
       0, // tokenId
       quantity, // Quantity, correctly formatted as BigNumber
@@ -2059,7 +2059,7 @@ module.exports = async (req, res) => {
       nonce: web3.utils.toHex(txCount),
       gasLimit: web3.utils.toHex(800000),
       gasPrice: web3.utils.toHex(web3.utils.toWei('2', 'gwei')),
-      data: data
+      data: transactionData
     };
 
     console.log("Raw unsigned tx:", txObject);
