@@ -2013,29 +2013,11 @@ module.exports = async (req, res) => {
       currency: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
     };
 
-    // Manually encode allowlistProofData parameters
-    const mintAddressBytes32 = web3.utils.padLeft(web3.utils.toHex(mintAddress), 64);
-    const tokenId = web3.utils.padLeft(web3.utils.toHex(0), 64);
-    const quantityBytes32 = web3.utils.padLeft(web3.utils.toHex(quantity), 64);
-    const currencyBytes32 = web3.utils.padLeft(web3.utils.toHex('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'), 64);
-    const pricePerTokenBytes32 = web3.utils.padLeft(web3.utils.toHex(pricePerToken), 64);
-    const proof = web3.utils.padRight(AllowlistProof.proof[0], 64);
-    const quantityLimitPerWalletBytes32 = web3.utils.padLeft(web3.utils.toHex(quantity), 64);
-    const pricePerTokenProofBytes32 = web3.utils.padLeft(web3.utils.toHex(pricePerToken), 64);
-    const currencyProofBytes32 = web3.utils.padLeft(web3.utils.toHex('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'), 64);
-    const data = web3.utils.padRight('0x', 64);
-
-    // Concatenate the encoded parameters
-    const allowlistProofData = mintAddressBytes32 +
-      tokenId +
-      quantityBytes32 +
-      currencyBytes32 +
-      pricePerTokenBytes32 +
-      proof +
-      quantityLimitPerWalletBytes32 +
-      pricePerTokenProofBytes32 +
-      currencyProofBytes32 +
-      data;
+    // Encode AllowlistProof using web3 ABI encoding
+    const allowlistProofData = web3.eth.abi.encodeParameters(
+      ['tuple(bytes32[],uint256,uint256,address)'],
+      [[AllowlistProof.proof, AllowlistProof.quantityLimitPerWallet, AllowlistProof.pricePerToken, AllowlistProof.currency]]
+    );
 
     // Prepare the transaction
     // When calling the contract's `claim` function, pass numeric values as BigNumber or compatible strings
