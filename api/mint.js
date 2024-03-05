@@ -2005,13 +2005,19 @@ module.exports = async (req, res) => {
     const quantity = quantityBig.toString();
     const pricePerToken = pricePerTokenBig.toString();
     
-    //AllowlistProof with corrected BigNumber formatting
+    // AllowlistProof with corrected BigNumber formatting
     const AllowlistProof = {
       proof: ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"],
       quantityLimitPerWallet: quantity,
       pricePerToken: pricePerToken,
       currency: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
     };
+
+    // Encode AllowlistProof using web3 ABI encoding
+    const allowlistProofData = web3.eth.abi.encodeParameters(
+      ['bytes32[]', 'uint256', 'uint256', 'address'],
+      [AllowlistProof.proof, AllowlistProof.quantityLimitPerWallet, AllowlistProof.pricePerToken, AllowlistProof.currency]
+    );
 
     // Prepare the transaction
     // When calling the contract's `claim` function, pass numeric values as BigNumber or compatible strings
@@ -2021,7 +2027,7 @@ module.exports = async (req, res) => {
       quantity, // Quantity, correctly formatted as BigNumber
       '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', // Currency (native EDG in this case)
       pricePerToken, // Price per token, correctly formatted as BigNumber
-      AllowlistProof,
+      allowlistProofData, // Pass the encoded AllowlistProof
       '0x' // Data
     ).encodeABI();
 
