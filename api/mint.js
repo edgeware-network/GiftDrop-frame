@@ -2007,7 +2007,7 @@ module.exports = async (req, res) => {
 
     // AllowlistProof with corrected BigNumber formatting
     const AllowlistProof = {
-      proof: [web3.utils.fromAscii("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")],
+      proof: [web3.utils.asciiToHex("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")],
       quantityLimitPerWallet: quantity,
       pricePerToken: pricePerToken,
       currency: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
