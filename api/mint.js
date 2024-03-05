@@ -2015,8 +2015,8 @@ module.exports = async (req, res) => {
 
     // Encode AllowlistProof using web3 ABI encoding
     const allowlistProofData = web3.eth.abi.encodeParameters(
-      ['bytes32[]', 'uint256', 'uint256', 'address'],
-      [AllowlistProof.proof, AllowlistProof.quantityLimitPerWallet, AllowlistProof.pricePerToken, AllowlistProof.currency]
+      ['bytes32[]', 'uint256', 'uint256', 'address', 'address'],
+      [AllowlistProof.proof, AllowlistProof.quantityLimitPerWallet, AllowlistProof.pricePerToken, AllowlistProof.currency, '0x0000000000000000000000000000000000000000']
     );
 
     // Prepare the transaction
