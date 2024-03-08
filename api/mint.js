@@ -73,7 +73,14 @@ const submitTransaction = async (req, res) => {
         1, // Quantity
         '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', // Currency (0x0 for native currency)
         0, // Price per token (0 for free mint)
-        [[], 0, 0, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'], // Allowlist proof (empty for public mint)
+        [
+          [
+            '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', // bytes32[] proof
+          ],
+          0x180, // quantityLimitPerWallet
+          0, // pricePerToken
+          '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', // currency
+        ], // AllowlistProof
         '0x' // Data (empty)
       )
       .encodeABI();
