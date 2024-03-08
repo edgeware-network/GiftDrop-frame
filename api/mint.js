@@ -39,14 +39,14 @@ const privateKey = process.env.PRIVATE_KEY;
 const secretWord = process.env.SECRET_WORD;
 
 // Increase the timeout for the serverless function
-module.exports.config = {
+const config = {
   api: {
     bodyParser: false,
   },
   timeout: 60, // Set the timeout to 60 seconds (adjust as needed)
 };
 
-module.exports.submitTransaction = async (req, res) => {
+const submitTransaction = async (req, res) => {
   const { mintAddress, secretWordInput } = req.query;
 
   // Verify the secret word
@@ -99,7 +99,7 @@ module.exports.submitTransaction = async (req, res) => {
   }
 };
 
-module.exports.waitForReceipt = async (req, res) => {
+const waitForReceipt = async (req, res) => {
   const { transactionHash } = req.query;
 
   try {
@@ -115,3 +115,18 @@ module.exports.waitForReceipt = async (req, res) => {
     res.status(500).json({ error: 'Failed to get transaction receipt' });
   }
 };
+
+// Export the serverless functions
+module.exports = (req, res) => {
+  const { submit, wait, ...params } = req.query;
+
+  if (submit) {
+    return submitTransaction(req, res);
+  } else if (wait) {
+    return waitForReceipt(req, res);
+  } else {
+    return res.status(400).json({ error: 'Invalid request' });
+  }
+};
+
+module.exports.config = config;
