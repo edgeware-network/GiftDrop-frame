@@ -38,7 +38,15 @@ const privateKey = process.env.PRIVATE_KEY;
 // Secret word (set in environment variables)
 const secretWord = process.env.SECRET_WORD;
 
-module.exports = async (req, res) => {
+// Increase the timeout for the serverless function
+module.exports.config = {
+  api: {
+    bodyParser: false,
+  },
+  timeout: 60, // Set the timeout to 60 seconds (adjust as needed)
+};
+
+module.exports.submitTransaction = async (req, res) => {
   const { mintAddress, secretWordInput } = req.query;
 
   // Verify the secret word
@@ -82,11 +90,28 @@ module.exports = async (req, res) => {
     const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
 
     // Send the transaction
-    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    const transactionHash = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
 
-    res.status(200).json({ success: true, transactionHash: receipt.transactionHash });
+    res.status(200).json({ success: true, transactionHash });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to mint NFT' });
+    res.status(500).json({ error: 'Failed to submit transaction' });
+  }
+};
+
+module.exports.waitForReceipt = async (req, res) => {
+  const { transactionHash } = req.query;
+
+  try {
+    // Create a new Web3 instance with the Edgeware EdgeEVM RPC
+    const web3 = new Web3('https://edgeware-evm.jelliedowl.net');
+
+    // Wait for the transaction receipt
+    const receipt = await web3.eth.waitForTransactionReceipt(transactionHash);
+
+    res.status(200).json({ success: true, receipt });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to get transaction receipt' });
   }
 };
