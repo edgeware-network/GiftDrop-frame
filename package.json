@@ -7,8 +7,6 @@
   "author": "Shankar Warang <shankar@edgeware.community>",
   "license": "MIT",
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "web3": "1.10.4",
-    "web3-utils": "1.10.4"
+    "ethers": "^5.7.2"
   }
 }
