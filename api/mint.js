@@ -33,7 +33,10 @@ const abi = [
 
 module.exports = async (req, res) => {
   try {
-    const { address, secretWord } = req.body;
+    const rawBody = await getRawBody(req);
+    const body = JSON.parse(rawBody || '{}');
+    const { address, secretWord } = body;
+
     const expectedSecretWord = process.env.SECRET_WORD;
 
     if (secretWord !== expectedSecretWord) {
@@ -80,4 +83,33 @@ module.exports = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
+};
+
+// Helper function to get the raw request body
+const getRawBody = async (req) => {
+  const { rawBody } = await getRawBodyFromRequest(req);
+  return rawBody;
+};
+
+// Helper function provided by the Vercel runtime
+const getRawBodyFromRequest = async (req) => {
+  const { body } = req;
+  if (body) {
+    return { rawBody: body };
+  }
+
+  const buffer = await getRawBodyFromStream(req);
+  return { rawBody: buffer.toString() };
+};
+
+// Helper function provided by the Vercel runtime
+const getRawBodyFromStream = async (req) => {
+  const chunks = [];
+  const result = await new Promise((resolve, reject) => {
+    req.on('data', (chunk) => chunks.push(chunk));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+
+  return result;
 };
