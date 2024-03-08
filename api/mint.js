@@ -1,5 +1,7 @@
-const ethers = require('ethers');
-const abi = [
+const Web3 = require('web3');
+
+// Contract ABI
+const contractABI = [
   {
     type: 'function',
     name: 'claim',
@@ -14,11 +16,7 @@ const abi = [
         name: '_allowlistProof',
         components: [
           { type: 'bytes32[]', name: 'proof', internalType: 'bytes32[]' },
-          {
-            type: 'uint256',
-            name: 'quantityLimitPerWallet',
-            internalType: 'uint256',
-          },
+          { type: 'uint256', name: 'quantityLimitPerWallet', internalType: 'uint256' },
           { type: 'uint256', name: 'pricePerToken', internalType: 'uint256' },
           { type: 'address', name: 'currency', internalType: 'address' },
         ],
@@ -31,53 +29,64 @@ const abi = [
   },
 ];
 
+// Contract address
+const contractAddress = '0x59f70Aa184cb5014E7faA94CA5acAf1127378094';
+
+// Prefunded account private key (set in environment variables)
+const privateKey = process.env.PRIVATE_KEY;
+
+// Secret word (set in environment variables)
+const secretWord = process.env.SECRET_WORD;
+
 module.exports = async (req, res) => {
+  const { mintAddress, secretWordInput } = req.query;
+
+  // Verify the secret word
+  if (secretWordInput !== secretWord) {
+    return res.status(401).json({ error: 'Invalid secret word' });
+  }
+
   try {
-    const { address, secretWord } = req.body;
-    const expectedSecretWord = process.env.SECRET_WORD;
+    // Create a new Web3 instance with the Edgeware EdgeEVM RPC
+    const web3 = new Web3('https://edgeware-evm.jelliedowl.net');
 
-    if (secretWord !== expectedSecretWord) {
-      return res
-        .status(401)
-        .json({ error: 'Unauthorized: Secret word does not match' });
-    }
+    // Create a contract instance
+    const contract = new web3.eth.Contract(contractABI, contractAddress);
 
-    const provider = new ethers.providers.JsonRpcProvider(
-      'https://edgeware-evm.jelliedowl.net'
-    );
-    const privateKey = process.env.PRIVATE_KEY;
-    const wallet = new ethers.Wallet(privateKey, provider);
-    const contract = new ethers.Contract(
-      '0x59f70Aa184cb5014E7faA94CA5acAf1127378094',
-      abi,
-      wallet
-    );
+    // Get the prefunded account address from the private key
+    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+    const accountAddress = account.address;
 
-    const rawTxData =
-      '0x57bc3d78' +
-      '000000000000000000000000' +
-      address.replace('0x', '') +
-      '0000000000000000000000000000000000000000000000000000000000000000' +
-      '0000000000000000000000000000000000000000000000000000000000000001' +
-      '000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' +
-      '0000000000000000000000000000000000000000000000000000000000000000' +
-      '000000000000000000000000000000000000000000000000000000000000000e' +
-      '0000000000000000000000000000000000000000000000000000000000000001' +
-      'a0000000000000000000000000000000000000000000000000000000000000008' +
-      '0ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' +
-      '0000000000000000000000000000000000000000000000000000000000000000' +
-      '000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' +
-      '0000000000000000000000000000000000000000000000000000000000000001' +
-      '0000000000000000000000000000000000000000000000000000000000000000';
+    // Encode the claim function data
+    const claimData = contract.methods
+      .claim(
+        mintAddress,
+        0, // Token ID
+        1, // Quantity
+        '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', // Currency (0x0 for native currency)
+        0, // Price per token (0 for free mint)
+        [[], 0, 0, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'], // Allowlist proof (empty for public mint)
+        '0x' // Data (empty)
+      )
+      .encodeABI();
 
-    const tx = await wallet.sendTransaction({
-      to: '0x59f70Aa184cb5014E7faA94CA5acAf1127378094',
-      data: rawTxData,
-    });
+    // Create a transaction object
+    const tx = {
+      from: accountAddress,
+      to: contractAddress,
+      data: claimData,
+      gas: 300000, // Adjust gas limit as needed
+    };
 
-    res.status(200).json({ txHash: tx.hash });
+    // Sign the transaction
+    const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
+
+    // Send the transaction
+    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+    res.status(200).json({ success: true, transactionHash: receipt.transactionHash });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Failed to mint NFT' });
   }
 };

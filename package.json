@@ -7,6 +7,6 @@
   "author": "Shankar Warang <shankar@edgeware.community>",
   "license": "MIT",
   "dependencies": {
-    "ethers": "^5.7.2"
+    "web3": "^1.8.2"
   }
 }
