@@ -74,10 +74,10 @@ const submitTransaction = async (req, res) => {
         '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', // Currency (0x0 for native currency)
         0, // Price per token (0 for free mint)
         web3.eth.abi.encodeParameters(
-          ['uint256', 'bytes32[]', 'uint256', 'address'],
+          ['bytes32[]', 'uint256', 'uint256', 'address'],
           [
-            '0x180', // quantityLimitPerWallet
             ['0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'], // bytes32[] proof
+            '0x180', // quantityLimitPerWallet
             '0', // pricePerToken
             '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', // currency
           ]
